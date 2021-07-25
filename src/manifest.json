@@ -11,7 +11,7 @@
   "browser_action": {
     "default_icon": "images/logo.png"
   },
-  "homepage_url": "https://github.com/zxyao145/",
+  "homepage_url": "https://github.com/zxyao145/Anisdora-ChromeExt",
   "background": {
     "scripts": ["index.js"]
   },
