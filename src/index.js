@@ -2,6 +2,9 @@
   const api = "https://cdn.jsdelivr.net/gh/zxyao145/awesome-websites/list.json";
   let storageDataCache = [];
   const appName = "Anisdora";
+  const localStorageVersionKey = appName + "_update";
+  const localStorageDataKey = appName + "_data";
+
 
   /**
    * 处理返回的json数据
@@ -9,7 +12,8 @@
    * @param {number} tabId 
    */
   function handleResJson(msg, tab) {
-    randomJump(msg.data, tab)
+      randomJump(msg.data, tab)
+    }
   }
 
 
@@ -22,7 +26,10 @@
   function randomJump(dataArr, tab) {
     const randomIndex = Math.floor(Math.random() * dataArr.length);
     const info = dataArr[randomIndex];
-    const url = info[0];
+    let url = info[0];
+    if(!url){
+      url = info.url;
+    }
     // console.log(url)
     dataArr.splice(randomIndex, 1)
     storageDataCache = dataArr;
