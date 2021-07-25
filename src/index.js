@@ -1,6 +1,7 @@
 (function () {
   const api = "https://cdn.jsdelivr.net/gh/zxyao145/awesome-websites/list.json";
   let storageDataCache = [];
+  const appName = "Anisdora";
 
   /**
    * 处理返回的json数据
@@ -12,6 +13,7 @@
   }
 
 
+  let timeout = -1;
   /**
    * 随机跳转到一个网站
    * @param {Array<object>} dataArr 
@@ -25,6 +27,19 @@
     dataArr.splice(randomIndex, 1)
     storageDataCache = dataArr;
     chrome.tabs.update(tab.id, { url: url });
+
+    if(timeout !== -1){
+      window.clearTimeout(timeout);
+    }
+    timeout = setTimeout(() => {
+      chrome.browserAction.setIcon({
+        path: {
+          "19": "images/logo-19.png",
+          "38": "images/logo-38.png"
+        }
+      });
+      timeout = -1;
+    }, 500);
   }
 
 
@@ -46,6 +61,16 @@
         }
       }
     };
+    xmlHttp.ontimeout = function () {
+      alert(appName + " 请求超时，无法获取随机网站。\n" + appName + " request timed out, unable to get the random website");
+    };
+    xmlHttp.onerror = function (e) {
+      console.error(e);
+      alert(appName + " 请求发生错误，无法获取随机网站。\n" + appName + " an error occurred, unable to get the random website");
+    };
+
+    // 指定 10 秒钟超时
+    xmlHttp.timeout = 10 * 1000;
     xmlHttp.open("GET", api, true);
     xmlHttp.send(null);
   }
@@ -53,6 +78,15 @@
 
   let lastClickTime;
   chrome.browserAction.onClicked.addListener(function (tab) {
+    if(timeout === -1){
+      chrome.browserAction.setIcon({
+        path: {
+          "19": "images/logo-h-19.png",
+          "38": "images/logo-h-38.png"
+        }
+      });
+    }
+    
     // 禁止连续点击
     const timeNow = Date.now();
     if (lastClickTime) {
