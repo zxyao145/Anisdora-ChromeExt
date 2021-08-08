@@ -1,0 +1,25 @@
+{
+  "manifest_version": 2,
+  "version": "0.1",
+  "name": "Anisdora",
+  "description": "Open an interesting website randomly",
+  "icons": {
+    "16": "images/logo.png",
+    "48": "images/logo.png",
+    "128": "images/logo.png"
+  },
+  "browser_action": {
+    "default_icon": "images/logo.png"
+  },
+  "homepage_url": "https://github.com/zxyao145/Anisdora-ChromeExt",
+  "background": {
+    "scripts": ["index.js"]
+  },
+  "permissions": [
+    "*://cdn.jsdelivr.net/*"
+  ],
+  "options_ui": {
+    "page": "options.html",
+    "chrome_style": true
+  }
+}

@@ -1,9 +1,9 @@
 (function () {
   const api = "https://cdn.jsdelivr.net/gh/zxyao145/awesome-websites/list.json";
-  let storageDataCache = [];
-  const appName = "Anisdora";
+  const appName = " ";
   const localStorageVersionKey = appName + "_update";
-  const localStorageDataKey = appName + "_data";
+  const localStorageFullDataKey = appName + "_data";
+  const localStorageDiffDataKey = appName + "_diff_data";
 
 
   /**
@@ -12,7 +12,33 @@
    * @param {number} tabId 
    */
   function handleResJson(msg, tab) {
+    const version = msg.update;
+    const lastVersion = localStorage.getItem(localStorageVersionKey);
+    if (!lastVersion) {
+      localStorage.setItem(localStorageVersionKey, version);
+      const jsonStr = JSON.stringify(msg.data);
+      localStorage.setItem(localStorageFullDataKey, jsonStr);
+      localStorage.setItem(localStorageDiffDataKey, jsonStr);
       randomJump(msg.data, tab)
+    } else {
+      if (lastVersion === version) {
+        const jsonStr = JSON.stringify(msg.data);
+        localStorage.setItem(localStorageFullDataKey, jsonStr);
+        localStorage.setItem(localStorageDiffDataKey, jsonStr);
+        randomJump(msg.data, tab)
+      } else {
+        const lastData = JSON.parse(localStorage.getItem(localStorageFullDataKey));
+        const curDataDiff = Array.from(new Set(msg.data));
+        for (let i = 0; i < lastData.length; i++) {
+          let index = curDataDiff.indexOf(lastData[i]);
+          if (index > 0) {
+            curDataDiff.splice(index, 1);
+          }
+        }
+        localStorage.setItem(localStorageFullDataKey, JSON.stringify(msg.data));
+        localStorage.setItem(localStorageDiffDataKey, JSON.stringify(curDataDiff));
+        randomJump(curDataDiff, tab)
+      }
     }
   }
 
@@ -27,15 +53,15 @@
     const randomIndex = Math.floor(Math.random() * dataArr.length);
     const info = dataArr[randomIndex];
     let url = info[0];
-    if(!url){
+    if (!url) {
       url = info.url;
     }
     // console.log(url)
     dataArr.splice(randomIndex, 1)
-    storageDataCache = dataArr;
+    localStorage.setItem(localStorageDiffDataKey, JSON.stringify(dataArr));
     chrome.tabs.update(tab.id, { url: url });
 
-    if(timeout !== -1){
+    if (timeout !== -1) {
       window.clearTimeout(timeout);
     }
     timeout = setTimeout(() => {
@@ -85,7 +111,7 @@
 
   let lastClickTime;
   chrome.browserAction.onClicked.addListener(function (tab) {
-    if(timeout === -1){
+    if (timeout === -1) {
       chrome.browserAction.setIcon({
         path: {
           "19": "images/logo-h-19.png",
@@ -93,7 +119,7 @@
         }
       });
     }
-    
+
     // 禁止连续点击
     const timeNow = Date.now();
     if (lastClickTime) {
@@ -104,6 +130,7 @@
     }
     lastClickTime = timeNow;
 
+    const storageDataCache = JSON.parse(localStorage.getItem(localStorageDiffDataKey));
     if (storageDataCache && storageDataCache.length > 0) {
       randomJump(storageDataCache, tab);
     } else {
